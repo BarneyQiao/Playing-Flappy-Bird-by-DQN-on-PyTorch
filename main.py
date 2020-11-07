@@ -2,7 +2,7 @@ import pdb
 import cv2
 import sys
 import os
-sys.path.append("game/")
+# sys.path.append("game/")
 import wrapped_flappy_bird as game
 import random
 import numpy as np
@@ -25,9 +25,10 @@ UPDATE_TIME = 100
 width = 80
 height = 80
 
+# 彩色图像转化为黑白的二值图像
 def preprocess(observation):
-    observation = cv2.cvtColor(cv2.resize(observation, (80, 80)), cv2.COLOR_BGR2GRAY)
-    ret, observation = cv2.threshold(observation,1,255,cv2.THRESH_BINARY)
+    observation = cv2.cvtColor(cv2.resize(observation, (80, 80)), cv2.COLOR_BGR2GRAY) # 转换为80×80的图像
+    ret, observation = cv2.threshold(observation,1,255,cv2.THRESH_BINARY) # 黑白二值阈值化
     return np.reshape(observation, (1,80,80))
 
 class DeepNetWork(nn.Module):
@@ -53,9 +54,12 @@ class DeepNetWork(nn.Module):
         self.out = nn.Linear(256,2)
 
     def forward(self, x):
-        x = self.conv1(x); x = self.conv2(x);
-        x = self.conv3(x); x = x.view(x.size(0),-1)
-        x = self.fc1(x); return self.out(x)
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = x.view(x.size(0),-1)
+        x = self.fc1(x)
+        return self.out(x)
 
 class BrainDQNMain(object):
     def save(self):
@@ -69,13 +73,21 @@ class BrainDQNMain(object):
             self.Q_netT.load_state_dict(torch.load('params3.pth'))
 
     def __init__(self,actions):
+        # 在每个timestep下agent与环境交互得到的转移样本 (st,at,rt,st+1) 储存到回放记忆库，
+        # 要训练时就随机拿出一些（minibatch）数据来训练，打乱其中的相关性
         self.replayMemory = deque() # init some parameters
         self.timeStep = 0
+        # 有epsilon的概率，随机选择一个动作，1-epsilon的概率通过网络输出的Q（max）值选择动作
         self.epsilon = INITIAL_EPSILON
+        # 初始化动作
         self.actions = actions
+        # 当前值网络
         self.Q_net=DeepNetWork()
-        self.Q_netT=DeepNetWork();
+        # 目标值网络
+        self.Q_netT=DeepNetWork()
+        # 加载训练好的模型，在训练的模型基础上继续训练
         self.load()
+        # 使用均方误差作为损失函数
         self.loss_func=nn.MSELoss()
         LR=1e-6
         self.optimizer = torch.optim.Adam(self.Q_net.parameters(), lr=LR)
