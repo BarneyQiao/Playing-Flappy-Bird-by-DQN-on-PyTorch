@@ -1,0 +1,10 @@
+
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/other.xml
+.idea/Playing-Flappy-Bird-by-DQN-on-PyTorch.iml
+.idea/vcs.xml
+game/__pycache__/flappy_bird_utils.cpython-36.pyc
+game/__pycache__/wrapped_flappy_bird.cpython-36.pyc
